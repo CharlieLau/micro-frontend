@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>微前端测试</title>
+</head>
+
+<body>
+    <a href="#/home">home</a>
+    <a href="#/world">world</a>
+    <script type="module">
+        import { registerApplication, start } from '../lib/micro-frontend.js'
+
+        const APP1 = {
+            bootstrap: async (props) => {
+                console.log('bootstrap')
+            },
+            mount: async (props) => {
+                return Promise.resolve('mount')
+            },
+            unmount: async (props) => {
+                return Promise.resolve('unmount')
+            },
+            unload: async (props) => {
+                return Promise.resolve('unload')
+            }
+        }
+        const APP2 = {
+            bootstrap: async (props) => {
+                console.log('bootstrap')
+            },
+            mount: async (props) => {
+                return Promise.resolve('mount')
+            },
+            unmount: async (props) => {
+                return Promise.resolve('unmount')
+            },
+            unload: async (props) => {
+                return Promise.resolve('unload')
+            }
+        }
+        registerApplication('app1', props => {
+            // return new Promise((resolve) => {
+            //     setTimeout(() => {
+            //         resolve(APP1)
+            //     }, 3000)
+            // })
+            return Promise.resolve(APP1)
+        }, location => {
+            return location.hash === '#/home'
+        }, {
+            hello: 'home'
+        })
+        registerApplication('app2', props => {
+            return new Promise((resolve) => {
+                setTimeout(() => {
+                    resolve(APP2)
+                }, 3000)
+            })
+            // return Promise.resolve(APP1)
+        }, location => {
+            return location.hash === '#/world'
+        }, {
+            hello: 'world'
+        })
+        start()
+    </script>
+</body>
+
+</html>
