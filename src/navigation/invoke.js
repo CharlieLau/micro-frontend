@@ -4,13 +4,14 @@ import { toLoadPromise } from '../lifecyle/load'
 import { toMountPromise } from "../lifecyle/mount"
 import { toBootstrapPromise } from "../lifecyle/bootstrap"
 import { toUnmountPromise } from '../lifecyle/unmount'
+import {callCapturedEvents} from './interceptor'
 
 
 
 let appChangeUnderway = false
 let changesQueue = []
 
-export function invoke(pendings = []) {
+export function invoke(pendings = [], eventArgs) {
     if (appChangeUnderway) {
         return new Promise((resolve, reject) => {
             changesQueue.push({
@@ -30,7 +31,11 @@ export function invoke(pendings = []) {
     function loadApps() {
         const loadPromises = getAppsToLoad().map(toLoadPromise)
         Promise.all(loadPromises).then(() => {
+            callAllLocationEvents()
             return finish()
+        }).catch(e => {
+            callAllLocationEvents();
+            console.log(e)
         })
     }
 
@@ -45,7 +50,7 @@ export function invoke(pendings = []) {
             return toLoadPromise(app)
                 .then(toBootstrapPromise)
                 .then(() => unmountPromise)
-                .then(toMountPromise)
+                .then(() => toMountPromise(app))
         })
 
         // mount app
@@ -53,16 +58,20 @@ export function invoke(pendings = []) {
         const mountPromises = mountApps.map(app => {
             return toBootstrapPromise(app)
                 .then(() => unmountPromise)
-                .then(toMountPromise)
+                .then(() => toMountPromise(app))
         })
 
-
         unmountPromise.then(() => {
+            callAllLocationEvents();
             let loadAndMountPromises = loadPromises.concat(mountPromises);
             return Promise.all(loadAndMountPromises).then(finish, ex => {
                 pendings.forEach(item => item.reject(ex));
                 throw ex;
             });
+        }).catch(e => {
+            callAllLocationEvents();
+            console.log(e);
+            throw e;
         })
     }
 
@@ -80,5 +89,11 @@ export function invoke(pendings = []) {
         }
 
         return resolveValue
+    }
+
+
+    function callAllLocationEvents() {
+        pendings && pendings.length && pendings.filter(item => item.eventArgs).forEach(item => callCapturedEvents(item.eventArgs));
+        eventArgs && callCapturedEvents(eventArgs);
     }
 }

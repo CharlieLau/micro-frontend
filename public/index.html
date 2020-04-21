@@ -15,13 +15,13 @@
 
         const APP1 = {
             bootstrap: async (props) => {
-                console.log('bootstrap')
+                console.log('bootstrap1')
             },
             mount: async (props) => {
-                return Promise.resolve('mount')
+                console.log('mount1')
             },
             unmount: async (props) => {
-                return Promise.resolve('unmount')
+                console.log('unmount')
             },
             unload: async (props) => {
                 return Promise.resolve('unload')
@@ -29,24 +29,19 @@
         }
         const APP2 = {
             bootstrap: async (props) => {
-                console.log('bootstrap')
+                console.log('bootstrap2')
             },
             mount: async (props) => {
-                return Promise.resolve('mount')
+                console.log('mount2')
             },
             unmount: async (props) => {
-                return Promise.resolve('unmount')
+                console.log('unmount2')
             },
             unload: async (props) => {
                 return Promise.resolve('unload')
             }
         }
         registerApplication('app1', props => {
-            // return new Promise((resolve) => {
-            //     setTimeout(() => {
-            //         resolve(APP1)
-            //     }, 3000)
-            // })
             return Promise.resolve(APP1)
         }, location => {
             return location.hash === '#/home'
@@ -66,6 +61,7 @@
             hello: 'world'
         })
         start()
+        // window.start = start
     </script>
 </body>
 

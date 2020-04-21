@@ -5,13 +5,12 @@ import { toUnmountPromise } from "./unmount";
 
 
 export function toMountPromise(app) {
-
     if (app.status !== NOT_MOUNTED) {
         return Promise.resolve(app)
     }
     app.status = MOUNTING
 
-    return reasonableTime(app.mount(getProps(app)), app.timeout.mount).then(() => {
+    return reasonableTime(app.mount(getProps(app)), app.timeouts.mount).then(() => {
         app.status = MOUNTED
         return app
     }).catch(error => {
